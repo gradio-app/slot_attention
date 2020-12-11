@@ -4,12 +4,13 @@ import tensorflow as tf
 import numpy as np
 import gradio as gr
 import PIL
+import os
+import boto
 
 # When executing this notebook out of a subfolder, use the command below to
 # change to the project's root folder (required for imports):
 # %cd ..
 
-import slot_attention.data as data_utils
 import slot_attention.model as model_utils
 import subprocess
 
@@ -21,10 +22,14 @@ num_iterations = 3
 resolution = (128, 128)
 ckpt_path = "/tmp/object_discovery/"  # Path to model checkpoint.
 
-import os
 if not os.path.exists(ckpt_path):
     os.mkdir(ckpt_path)
-subprocess.call("gsutil cp gs://gresearch/slot-attention/object-discovery/* {}".format(ckpt_path), shell=True)
+import boto3
+s3=boto3.client('s3')
+list=s3.list_objects(Bucket='gradio-slot')["Contents"]
+for key in list:
+    s3.download_file("gradio-slot", key["Key"], os.path.join("/tmp", key["Key"]))
+print("-> DONE")
 
 def load_model(checkpoint_dir, num_slots=11, num_iters=3, batch_size=16):
     resolution = (128, 128)
@@ -84,15 +89,14 @@ iface = gr.Interface(
         gr.outputs.Image(label="Masks")
     ],
     examples=[
-        ["examples/1.jpg"],
-        ["examples/2.jpg"],
-        ["examples/3.jpg"],
+        ["examples/" + img] for img in os.listdir("examples/")
     ],
+    examples_per_page=4,
     title="Slot Attention",
     description="This is an interface implementation for 'Object-Centric Learning with Slot Attention', trained on the CLVER dataset. Click the examples to load them or upload your own images from the CLVER dataset.",
     article="""This is on based the paper ["Object-Centric Learning with Slot Attention"](https://arxiv.org/abs/2006.15055) by Francesco Locatello, Dirk Weissenborn, Thomas Unterthiner, Aravindh Mahendran, Georg Heigold, Jakob Uszkoreit, Alexey Dosovitskiy, and Thomas Kipf.
     """,
-    layout="unaligned"
+    layout="unaligned",
 )
 
 if __name__ == "__main__":
