@@ -5,7 +5,6 @@ import numpy as np
 import gradio as gr
 import PIL
 import os
-import boto
 
 # When executing this notebook out of a subfolder, use the command below to
 # change to the project's root folder (required for imports):
