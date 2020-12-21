@@ -19,6 +19,7 @@ batch_size = 1
 num_slots = 7
 num_iterations = 3
 resolution = (128, 128)
+raise ValueError("fail")
 ckpt_path = "/tmp/object_discovery/"  # Path to model checkpoint.
 
 if not os.path.exists(ckpt_path):
